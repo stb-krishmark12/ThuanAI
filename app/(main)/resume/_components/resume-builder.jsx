@@ -23,13 +23,102 @@ import useFetch from "@/hooks/use-fetch";
 import { useUser } from "@clerk/nextjs";
 import { entriesToMarkdown } from "@/app/lib/helper";
 import { resumeSchema } from "@/app/lib/schema";
-import html2pdf from "html2pdf.js/dist/html2pdf.min.js";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLoading } from "@/components/loading-provider";
+
+const editorStyles = `
+  .w-md-editor {
+    font-family: Arial, sans-serif !important;
+  }
+
+  .w-md-editor-text-pre,
+  .w-md-editor-text-input,
+  .w-md-editor-text,
+  .wmde-markdown-var {
+    font-family: Arial, sans-serif !important;
+    font-size: 10pt !important;
+    line-height: 1.2 !important;
+  }
+
+  .w-md-editor-preview {
+    font-family: Arial, sans-serif !important;
+    font-size: 10pt !important;
+    line-height: 1.2 !important;
+  }
+
+  .wmde-markdown {
+    font-family: Arial, sans-serif !important;
+    font-size: 10pt !important;
+    line-height: 1.2 !important;
+  }
+
+  .wmde-markdown h1,
+  .wmde-markdown h2,
+  .wmde-markdown h3,
+  .w-md-editor-preview h1,
+  .w-md-editor-preview h2,
+  .w-md-editor-preview h3 {
+    font-family: 'Times New Roman', serif !important;
+    font-weight: bold !important;
+    margin-top: 8pt !important;
+    margin-bottom: 4pt !important;
+  }
+
+  .wmde-markdown p,
+  .w-md-editor-preview p {
+    font-family: Arial, sans-serif !important;
+    font-size: 10pt !important;
+    margin-top: 4pt !important;
+    margin-bottom: 4pt !important;
+  }
+
+  .wmde-markdown ul,
+  .wmde-markdown ol,
+  .w-md-editor-preview ul,
+  .w-md-editor-preview ol {
+    font-family: Arial, sans-serif !important;
+    font-size: 10pt !important;
+    margin-top: 4pt !important;
+    margin-bottom: 4pt !important;
+    padding-left: 20pt !important;
+  }
+
+  .wmde-markdown li,
+  .w-md-editor-preview li {
+    font-family: Arial, sans-serif !important;
+    font-size: 10pt !important;
+    margin-top: 2pt !important;
+    margin-bottom: 2pt !important;
+  }
+
+  .w-md-editor-text-pre > code,
+  .w-md-editor-text-input {
+    font-family: Arial, sans-serif !important;
+    font-size: 10pt !important;
+  }
+
+  .w-md-editor-toolbar {
+    background-color: #f8f9fa !important;
+  }
+`;
 
 export default function ResumeBuilder({ initialContent }) {
   const [activeTab, setActiveTab] = useState("edit");
   const [previewContent, setPreviewContent] = useState(initialContent);
   const { user } = useUser();
   const [resumeMode, setResumeMode] = useState("preview");
+  const [entries, setEntries] = useState([]);
+  const [currentEntry, setCurrentEntry] = useState({
+    type: "Experience",
+    title: "",
+    organization: "",
+    startDate: "",
+    endDate: "",
+    description: "",
+  });
+  const { showLoading, hideLoading } = useLoading();
 
   const {
     control,
@@ -81,6 +170,18 @@ export default function ResumeBuilder({ initialContent }) {
     }
   }, [saveResult, saveError, isSaving]);
 
+  useEffect(() => {
+    // Add the styles to the document
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = editorStyles;
+    document.head.appendChild(styleSheet);
+
+    // Cleanup
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
+
   const getContactMarkdown = () => {
     const { contactInfo } = formValues;
     const parts = [];
@@ -113,11 +214,22 @@ export default function ResumeBuilder({ initialContent }) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generatePDF = async () => {
-    setIsGenerating(true);
+    const { experience, education, projects } = formValues;
+    const totalEntries = experience.length + education.length + projects.length;
+    
+    if (totalEntries === 0) {
+      toast.error("Please add at least one entry to your resume");
+      return;
+    }
+
+    showLoading("Generating PDF...");
     try {
+      // Dynamically import html2pdf only on client side
+      const html2pdf = (await import('html2pdf.js')).default;
+      
       const element = document.getElementById("resume-pdf");
       const opt = {
-        margin: [10, 10],
+        margin: [15, 15],
         filename: "resume.pdf",
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2 },
@@ -129,14 +241,66 @@ export default function ResumeBuilder({ initialContent }) {
         pagebreak: { mode: 'avoid-all' }
       };
 
-      const pdfContent = document.createElement('div');
-      pdfContent.innerHTML = element.innerHTML;
-      pdfContent.style.fontFamily = 'Times New Roman, serif';
-      pdfContent.style.fontSize = '11pt';
-      pdfContent.style.lineHeight = '1.2';
-      pdfContent.style.maxWidth = '210mm';
-      pdfContent.style.margin = '0 auto';
+      // Create a clone of the element to avoid modifying the original
+      const pdfContent = element.cloneNode(true);
+      
+      // Apply resume-friendly styles
+      pdfContent.style.cssText = `
+        font-family: Arial, sans-serif !important;
+        font-size: 10pt !important;
+        line-height: 1.2 !important;
+        max-width: 190mm !important;
+        margin: 0 auto !important;
+        color: #000000 !important;
+        background-color: #ffffff !important;
+      `;
 
+      // Style headings
+      const headings = pdfContent.querySelectorAll('h1, h2, h3');
+      headings.forEach(heading => {
+        heading.style.cssText = `
+          font-family: Times New Roman, serif !important;
+          font-weight: bold !important;
+          margin-top: 8pt !important;
+          margin-bottom: 4pt !important;
+        `;
+      });
+
+      // Style paragraphs
+      const paragraphs = pdfContent.querySelectorAll('p');
+      paragraphs.forEach(p => {
+        p.style.cssText = `
+          margin-top: 4pt !important;
+          margin-bottom: 4pt !important;
+          font-family: Arial, sans-serif !important;
+          font-size: 10pt !important;
+        `;
+      });
+
+      // Style lists
+      const lists = pdfContent.querySelectorAll('ul, ol');
+      lists.forEach(list => {
+        list.style.cssText = `
+          margin-top: 4pt !important;
+          margin-bottom: 4pt !important;
+          padding-left: 20pt !important;
+          font-family: Arial, sans-serif !important;
+          font-size: 10pt !important;
+        `;
+      });
+
+      // Style list items
+      const listItems = pdfContent.querySelectorAll('li');
+      listItems.forEach(item => {
+        item.style.cssText = `
+          margin-top: 2pt !important;
+          margin-bottom: 2pt !important;
+          font-family: Arial, sans-serif !important;
+          font-size: 10pt !important;
+        `;
+      });
+
+      // Replace the original element with the styled clone
       element.innerHTML = pdfContent.innerHTML;
 
       await html2pdf().set(opt).from(element).save();
@@ -144,7 +308,7 @@ export default function ResumeBuilder({ initialContent }) {
       console.error("PDF generation error:", error);
       toast.error("Failed to generate PDF");
     } finally {
-      setIsGenerating(false);
+      hideLoading();
     }
   };
 
@@ -159,6 +323,36 @@ export default function ResumeBuilder({ initialContent }) {
       await saveResumeFn(previewContent);
     } catch (error) {
       console.error("Save error:", error);
+    }
+  };
+
+  const handleAdd = async () => {
+    if (!currentEntry.title || !currentEntry.organization) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    showLoading("Adding entry...");
+    try {
+      const newEntry = {
+        ...currentEntry,
+        id: Date.now(),
+        description: currentEntry.description.trim().split('\n').filter(Boolean).join(' • ')
+      };
+      setEntries([...entries, newEntry]);
+      setCurrentEntry({
+        type: "Experience",
+        title: "",
+        organization: "",
+        startDate: "",
+        endDate: "",
+        description: "",
+      });
+      toast.success("Entry added successfully");
+    } catch (error) {
+      toast.error("Failed to add entry");
+    } finally {
+      hideLoading();
     }
   };
 
@@ -415,22 +609,39 @@ export default function ResumeBuilder({ initialContent }) {
               onChange={setPreviewContent}
               height={800}
               preview={resumeMode}
+              previewOptions={{
+                className: "wmde-markdown",
+                style: {
+                  fontFamily: 'Arial, sans-serif',
+                  fontSize: '10pt',
+                  lineHeight: 1.2,
+                  backgroundColor: '#ffffff',
+                }
+              }}
+              style={{
+                fontFamily: 'Arial, sans-serif',
+                fontSize: '10pt',
+                lineHeight: 1.2,
+              }}
             />
           </div>
           <div className="hidden">
             <div id="resume-pdf" className="p-4" style={{ 
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '11pt',
-              lineHeight: '1.2',
-              maxWidth: '210mm',
-              margin: '0 auto'
+              fontFamily: 'Arial, sans-serif !important',
+              fontSize: '10pt !important',
+              lineHeight: '1.2 !important',
+              maxWidth: '190mm !important',
+              margin: '0 auto !important',
+              backgroundColor: '#ffffff !important',
+              color: '#000000 !important'
             }}>
               <MDEditor.Markdown
                 source={previewContent}
                 style={{
                   background: "white",
                   color: "black",
-                  fontFamily: 'Times New Roman, serif',
+                  fontFamily: 'Arial, sans-serif !important',
+                  fontSize: '10pt !important',
                 }}
               />
             </div>

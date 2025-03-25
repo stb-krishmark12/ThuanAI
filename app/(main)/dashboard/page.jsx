@@ -1,18 +1,40 @@
+"use client";
+
 import { getIndustryInsights } from "@/actions/dashboard";
 import DashboardView from "./_component/dashboard-view";
 import { getUserOnboardingStatus } from "@/actions/user";
 import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useLoading } from "@/components/loading-provider";
 
-export default async function DashboardPage() {
-  const { isOnboarded } = await getUserOnboardingStatus();
+export default function DashboardPage() {
+  const [insights, setInsights] = useState(null);
+  const { showLoading, hideLoading } = useLoading();
 
-  // If not onboarded, redirect to onboarding page
-  // Skip this check if already on the onboarding page
-  if (!isOnboarded) {
-    redirect("/onboarding");
+  useEffect(() => {
+    const loadDashboard = async () => {
+      showLoading("Loading your dashboard...");
+      try {
+        const { isOnboarded } = await getUserOnboardingStatus();
+        if (!isOnboarded) {
+          redirect("/onboarding");
+          return;
+        }
+        const data = await getIndustryInsights();
+        setInsights(data);
+      } catch (error) {
+        console.error("Failed to load dashboard:", error);
+      } finally {
+        hideLoading();
+      }
+    };
+
+    loadDashboard();
+  }, []);
+
+  if (!insights) {
+    return null;
   }
-
-  const insights = await getIndustryInsights();
 
   return (
     <div className="container mx-auto">

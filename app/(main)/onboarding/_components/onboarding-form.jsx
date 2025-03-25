@@ -59,11 +59,7 @@ const OnboardingForm = ({ industries }) => {
 
       if (result.success) {
         toast.success("Profile completed successfully!");
-        // Add a small delay to ensure the toast is visible
-        setTimeout(() => {
-          router.push("/dashboard");
-          router.refresh();
-        }, 1000);
+        router.push("/dashboard");
       } else {
         throw new Error("Failed to update profile");
       }

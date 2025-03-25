@@ -7,6 +7,7 @@ import { MessageCircle, X, Send, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { useLoading } from "./loading-provider";
 
 const initialMessages = [
   {
@@ -22,6 +23,7 @@ export default function SupportChat() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const { user, isLoaded } = useUser();
+  const { showLoading, hideLoading } = useLoading();
   
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -50,6 +52,7 @@ export default function SupportChat() {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    showLoading("Thinking...");
     
     // Extract name if present in first greeting
     let detectedName = null;
@@ -74,12 +77,10 @@ export default function SupportChat() {
         },
         body: JSON.stringify({ 
           message: input,
-          // Send the entire conversation history with correct role mapping
           messageHistory: [...messages, userMessage].map(msg => ({
             role: msg.role === "system" ? "model" : "user",
             content: msg.content
           })),
-          // Send user info to the API if available
           userData: isLoaded && user ? {
             id: user.id,
             firstName: user.firstName || detectedName,
@@ -111,6 +112,7 @@ export default function SupportChat() {
       setMessages(prev => [...prev, { role: "system", content: fallbackResponse }]);
     } finally {
       setIsLoading(false);
+      hideLoading();
     }
   };
 
@@ -284,7 +286,7 @@ export default function SupportChat() {
           ))}
           {isLoading && (
             <div className="px-3 py-2 rounded-lg max-w-[85%] bg-muted">
-              <p className="text-sm">Typing...</p>
+              <p className="text-sm">Thinking...</p>
             </div>
           )}
           <div ref={messagesEndRef} />

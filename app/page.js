@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,8 +23,31 @@ import { features } from "@/data/features";
 import { testimonial } from "@/data/testimonial";
 import { faqs } from "@/data/faqs";
 import { howItWorks } from "@/data/howItWorks";
+import { useLoading } from "@/components/loading-provider";
 
 export default function LandingPage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const { showLoading, hideLoading } = useLoading();
+
+  useEffect(() => {
+    const loadPage = async () => {
+      showLoading("Loading ThunAI...");
+      try {
+        // Simulate loading time for dynamic content
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } finally {
+        setIsLoading(false);
+        hideLoading();
+      }
+    };
+
+    loadPage();
+  }, []);
+
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <>
       <div className="grid-background"></div>
