@@ -6,6 +6,7 @@ import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { dark } from "@clerk/themes";
 import CursorTrailProvider from "@/components/cursor-trail-provider";
+import SupportChatProvider from "@/components/support-chat-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
             <CursorTrailProvider />
             <Header />
             <main className="min-h-screen">{children}</main>
+            <SupportChatProvider />
             <Toaster richColors />
 
             <footer className="bg-muted/50 py-12">

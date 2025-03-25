@@ -1,27 +1,32 @@
-import { BrainCircuit, Briefcase, LineChart, ScrollText } from "lucide-react";
+import { BrainCircuit, Briefcase, LineChart, ScrollText, MessageCircle } from "lucide-react";
 
 export const features = [
   {
     icon: <BrainCircuit className="w-10 h-10 mb-4 text-primary" />,
-    title: "ThunAI Intelligence Coaching",
+    title: "AI-Powered Career Guidance",
     description:
-      "Receive tailored professional guidance and strategic recommendations powered by ThunAI's sophisticated algorithms.",
+      "Get personalized career advice and strategic insights powered by advanced AI algorithms tailored to your professional goals.",
   },
   {
     icon: <Briefcase className="w-10 h-10 mb-4 text-primary" />,
-    title: "Interview Excellence",
+    title: "Interview Mastery",
     description:
-      "Build confidence with ThunAI's field-specific practice sessions and real-time feedback to enhance your interview performance.",
+      "Ace your interviews with industry-specific practice sessions and instant feedback designed to boost your confidence and performance.",
   },
   {
     icon: <LineChart className="w-10 h-10 mb-4 text-primary" />,
-    title: "Market Intelligence",
+    title: "Industry Insights",
     description:
-      "Gain advantage with ThunAI's current industry analytics, compensation benchmarks, and employment forecasts.",
+      "Stay ahead with real-time industry trends, salary benchmarks, and job market forecasts to make informed career decisions.",
   },
   {
     icon: <ScrollText className="w-10 h-10 mb-4 text-primary" />,
-    title: "Resume Optimization",
-    description: "Create recruiter-friendly, ATS-compatible resumes with ThunAI's intelligent document engine.",
+    title: "Smart Resume Builder",
+    description: "Create standout, ATS-optimized resumes that highlight your strengths and catch recruiters' attention.",
+  },
+  {
+    icon: <MessageCircle className="w-10 h-10 mb-4 text-primary" />,
+    title: "24/7 AI Support Assistant",
+    description: "Get immediate answers to your career questions with our intelligent chat assistant that knows your profile and preferences.",
   },
 ];
