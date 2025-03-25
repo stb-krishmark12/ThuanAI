@@ -84,11 +84,11 @@ export default function ResumeBuilder({ initialContent }) {
   const getContactMarkdown = () => {
     const { contactInfo } = formValues;
     const parts = [];
-    if (contactInfo.email) parts.push(`📧 ${contactInfo.email}`);
-    if (contactInfo.mobile) parts.push(`📱 ${contactInfo.mobile}`);
+    if (contactInfo.email) parts.push(`${contactInfo.email}`);
+    if (contactInfo.mobile) parts.push(`${contactInfo.mobile}`);
     if (contactInfo.linkedin)
-      parts.push(`💼 [LinkedIn](${contactInfo.linkedin})`);
-    if (contactInfo.twitter) parts.push(`🐦 [Twitter](${contactInfo.twitter})`);
+      parts.push(`[LinkedIn](${contactInfo.linkedin})`);
+    if (contactInfo.twitter) parts.push(`[Portfolio](${contactInfo.twitter})`);
 
     return parts.length > 0
       ? `## <div align="center">${user.fullName}</div>
@@ -117,16 +117,32 @@ export default function ResumeBuilder({ initialContent }) {
     try {
       const element = document.getElementById("resume-pdf");
       const opt = {
-        margin: [15, 15],
+        margin: [10, 10],
         filename: "resume.pdf",
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2 },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        jsPDF: { 
+          unit: "mm", 
+          format: "a4", 
+          orientation: "portrait"
+        },
+        pagebreak: { mode: 'avoid-all' }
       };
+
+      const pdfContent = document.createElement('div');
+      pdfContent.innerHTML = element.innerHTML;
+      pdfContent.style.fontFamily = 'Times New Roman, serif';
+      pdfContent.style.fontSize = '11pt';
+      pdfContent.style.lineHeight = '1.2';
+      pdfContent.style.maxWidth = '210mm';
+      pdfContent.style.margin = '0 auto';
+
+      element.innerHTML = pdfContent.innerHTML;
 
       await html2pdf().set(opt).from(element).save();
     } catch (error) {
       console.error("PDF generation error:", error);
+      toast.error("Failed to generate PDF");
     } finally {
       setIsGenerating(false);
     }
@@ -240,12 +256,12 @@ export default function ResumeBuilder({ initialContent }) {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Twitter/X Profile
+                    Github/portfolio URL
                   </label>
                   <Input
                     {...register("contactInfo.twitter")}
                     type="url"
-                    placeholder="https://twitter.com/your-handle"
+                    placeholder="Enter your gihub profile / portfolio link"
                   />
                   {errors.contactInfo?.twitter && (
                     <p className="text-sm text-red-500">
@@ -402,12 +418,19 @@ export default function ResumeBuilder({ initialContent }) {
             />
           </div>
           <div className="hidden">
-            <div id="resume-pdf">
+            <div id="resume-pdf" className="p-4" style={{ 
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '11pt',
+              lineHeight: '1.2',
+              maxWidth: '210mm',
+              margin: '0 auto'
+            }}>
               <MDEditor.Markdown
                 source={previewContent}
                 style={{
                   background: "white",
                   color: "black",
+                  fontFamily: 'Times New Roman, serif',
                 }}
               />
             </div>

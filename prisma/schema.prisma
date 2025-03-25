@@ -17,6 +17,7 @@ model User {
   industryInsight IndustryInsight? @relation(fields: [industry], references: [industry])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  isOnboarded   Boolean   @default(false)  // Flag to indicate if the user has completed onboarding
 
   // Profile fields
   bio           String?

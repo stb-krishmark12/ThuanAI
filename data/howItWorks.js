@@ -2,24 +2,23 @@ import { UserPlus, FileEdit, Users, LineChart } from "lucide-react";
 
 export const howItWorks = [
   {
-    title: "Professional Onboarding",
-    description: "Share your industry and expertise for personalized guidance",
+    title: "Personalized Setup",
+    description: "Tell ThunAI about your career field and skills for tailored advice",
     icon: <UserPlus className="w-8 h-8 text-primary" />,
   },
   {
-    title: "Craft Your Documents",
-    description: "Create ATS-optimized resumes and compelling cover letters",
+    title: "Document Enhancement",
+    description: "Let ThunAI help you build recruiter-friendly resumes and persuasive cover letters",
     icon: <FileEdit className="w-8 h-8 text-primary" />,
   },
   {
-    title: "Prepare for Interviews",
-    description:
-      "Practice with AI-powered mock interviews tailored to your role",
+    title: "Interview Mastery",
+    description: "Sharpen your skills with ThunAI's customized interview simulations",
     icon: <Users className="w-8 h-8 text-primary" />,
   },
   {
-    title: "Track Your Progress",
-    description: "Monitor improvements with detailed performance analytics",
+    title: "Career Insights",
+    description: "Visualize your growth with ThunAI's comprehensive performance metrics",
     icon: <LineChart className="w-8 h-8 text-primary" />,
   },
 ];

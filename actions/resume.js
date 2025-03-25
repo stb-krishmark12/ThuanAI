@@ -6,7 +6,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { revalidatePath } from "next/cache";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 export async function saveResume(content) {
   const { userId } = await auth();
@@ -72,18 +72,20 @@ export async function improveWithAI({ current, type }) {
 
   const prompt = `
     As an expert resume writer, improve the following ${type} description for a ${user.industry} professional.
-    Make it more impactful, quantifiable, and aligned with industry standards.
+    Make it impactful and concise to fit in a single-page resume format.
     Current content: "${current}"
 
     Requirements:
-    1. Use action verbs
-    2. Include metrics and results where possible
+    1. Use strong action verbs
+    2. Include key metrics and results
     3. Highlight relevant technical skills
-    4. Keep it concise but detailed
-    5. Focus on achievements over responsibilities
+    4. Keep it under 2-3 lines maximum
+    5. Focus on most impressive achievements
     6. Use industry-specific keywords
+    7. Separate multiple points with bullets (•)
     
     Format the response as a single paragraph without any additional text or explanations.
+    Maximum length: 250 characters.
   `;
 
   try {

@@ -33,12 +33,7 @@ import { updateUser } from "@/actions/user";
 const OnboardingForm = ({ industries }) => {
   const router = useRouter();
   const [selectedIndustry, setSelectedIndustry] = useState(null);
-
-  const {
-    loading: updateLoading,
-    fn: updateUserFn,
-    data: updateResult,
-  } = useFetch(updateUser);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -52,26 +47,33 @@ const OnboardingForm = ({ industries }) => {
 
   const onSubmit = async (values) => {
     try {
+      setIsSubmitting(true);
       const formattedIndustry = `${values.industry}-${values.subIndustry
         .toLowerCase()
         .replace(/ /g, "-")}`;
 
-      await updateUserFn({
+      const result = await updateUser({
         ...values,
         industry: formattedIndustry,
       });
+
+      if (result.success) {
+        toast.success("Profile completed successfully!");
+        // Add a small delay to ensure the toast is visible
+        setTimeout(() => {
+          router.push("/dashboard");
+          router.refresh();
+        }, 1000);
+      } else {
+        throw new Error("Failed to update profile");
+      }
     } catch (error) {
       console.error("Onboarding error:", error);
+      toast.error("Failed to complete profile. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    if (updateResult?.success && !updateLoading) {
-      toast.success("Profile completed successfully!");
-      router.push("/dashboard");
-      router.refresh();
-    }
-  }, [updateResult, updateLoading]);
 
   const watchIndustry = watch("industry");
 
@@ -194,8 +196,8 @@ const OnboardingForm = ({ industries }) => {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={updateLoading}>
-              {updateLoading ? (
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...

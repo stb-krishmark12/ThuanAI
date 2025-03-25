@@ -55,11 +55,11 @@ export function EntryForm({ type, entries, onChange }) {
     const formattedEntry = {
       ...data,
       startDate: formatDisplayDate(data.startDate),
-      endDate: data.current ? "" : formatDisplayDate(data.endDate),
+      endDate: data.current ? "Present" : formatDisplayDate(data.endDate),
+      description: data.description.trim().split('\n').filter(Boolean).join(' • ')
     };
 
     onChange([...entries, formattedEntry]);
-
     reset();
     setIsAdding(false);
   });
@@ -99,6 +99,49 @@ export function EntryForm({ type, entries, onChange }) {
       current: description,
       type: type.toLowerCase(), // 'experience', 'education', or 'project'
     });
+  };
+
+  const getFieldConfig = () => {
+    switch (type) {
+      case 'Experience':
+        return {
+          title: {
+            placeholder: "Job Title / Position",
+            tooltip: "e.g., Software Engineer, Product Manager, UX Designer"
+          },
+          organization: {
+            placeholder: "Company Name",
+            tooltip: "e.g., Google, Microsoft, Tesla"
+          }
+        };
+      case 'Education':
+        return {
+          title: {
+            placeholder: "Course / Degree Name",
+            tooltip: "e.g., B.Tech in Computer Science, MBA in Marketing"
+          },
+          organization: {
+            placeholder: "College / University Name",
+            tooltip: "e.g., MIT, Stanford University, IIT Delhi"
+          }
+        };
+      case 'Project':
+        return {
+          title: {
+            placeholder: "Project Name",
+            tooltip: "e.g., E-commerce Website, Mobile App, AI Chatbot"
+          },
+          organization: {
+            placeholder: "Tech Stack / Technologies",
+            tooltip: "e.g., React, Node.js, Python, AWS"
+          }
+        };
+      default:
+        return {
+          title: { placeholder: "Title", tooltip: "" },
+          organization: { placeholder: "Organization", tooltip: "" }
+        };
+    }
   };
 
   return (
@@ -141,21 +184,31 @@ export function EntryForm({ type, entries, onChange }) {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Input
-                  placeholder="Title/Position"
-                  {...register("title")}
-                  error={errors.title}
-                />
+                <div className="relative group">
+                  <Input
+                    placeholder={getFieldConfig().title.placeholder}
+                    {...register("title")}
+                    error={errors.title}
+                  />
+                  <div className="absolute invisible group-hover:visible bg-black text-white p-2 rounded text-sm -top-8 left-0 whitespace-nowrap z-10">
+                    {getFieldConfig().title.tooltip}
+                  </div>
+                </div>
                 {errors.title && (
                   <p className="text-sm text-red-500">{errors.title.message}</p>
                 )}
               </div>
               <div className="space-y-2">
-                <Input
-                  placeholder="Organization/Company"
-                  {...register("organization")}
-                  error={errors.organization}
-                />
+                <div className="relative group">
+                  <Input
+                    placeholder={getFieldConfig().organization.placeholder}
+                    {...register("organization")}
+                    error={errors.organization}
+                  />
+                  <div className="absolute invisible group-hover:visible bg-black text-white p-2 rounded text-sm -top-8 left-0 whitespace-nowrap z-10">
+                    {getFieldConfig().organization.tooltip}
+                  </div>
+                </div>
                 {errors.organization && (
                   <p className="text-sm text-red-500">
                     {errors.organization.message}

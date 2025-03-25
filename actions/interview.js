@@ -5,9 +5,9 @@ import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-export async function generateQuiz() {
+export async function generateQuiz({ difficulty = "medium" }) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
@@ -16,19 +16,53 @@ export async function generateQuiz() {
     select: {
       industry: true,
       skills: true,
+      assessments: {
+        select: {
+          questions: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 3, // Get last 3 assessments
+      },
     },
   });
 
   if (!user) throw new Error("User not found");
 
+  // Get previously asked questions from recent assessments
+  const recentQuestions = user.assessments
+    .flatMap(assessment => assessment.questions)
+    .map(q => q.question);
+
+  const difficultyGuidelines = {
+    easy: "Focus on fundamental concepts and basic knowledge. Questions should be straightforward with clear answers.",
+    medium: "Mix of fundamental and advanced concepts. Include some problem-solving questions.",
+    hard: "Focus on complex scenarios, edge cases, and advanced problem-solving. Include system design and architecture questions."
+  };
+
   const prompt = `
-    Generate 10 technical interview questions for a ${
+    Generate 10 unique technical interview questions for a ${
       user.industry
     } professional${
     user.skills?.length ? ` with expertise in ${user.skills.join(", ")}` : ""
   }.
     
-    Each question should be multiple choice with 4 options.
+    ${recentQuestions.length > 0 ? `
+    DO NOT include any of these recently asked questions:
+    ${recentQuestions.join("\n")}
+    ` : ''}
+    
+    Difficulty Level: ${difficulty}
+    ${difficultyGuidelines[difficulty]}
+    
+    Each question should be:
+    1. Multiple choice with 4 options
+    2. Different from previous questions
+    3. Cover different aspects of ${user.industry}
+    4. Match the specified difficulty level
+    5. Include detailed explanations for the correct answer
     
     Return the response in this JSON format only, no additional text:
     {

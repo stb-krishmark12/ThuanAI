@@ -3,25 +3,25 @@ import { BrainCircuit, Briefcase, LineChart, ScrollText } from "lucide-react";
 export const features = [
   {
     icon: <BrainCircuit className="w-10 h-10 mb-4 text-primary" />,
-    title: "AI-Powered Career Guidance",
+    title: "ThunAI Intelligence Coaching",
     description:
-      "Get personalized career advice and insights powered by advanced AI technology.",
+      "Receive tailored professional guidance and strategic recommendations powered by ThunAI's sophisticated algorithms.",
   },
   {
     icon: <Briefcase className="w-10 h-10 mb-4 text-primary" />,
-    title: "Interview Preparation",
+    title: "Interview Excellence",
     description:
-      "Practice with role-specific questions and get instant feedback to improve your performance.",
+      "Build confidence with ThunAI's field-specific practice sessions and real-time feedback to enhance your interview performance.",
   },
   {
     icon: <LineChart className="w-10 h-10 mb-4 text-primary" />,
-    title: "Industry Insights",
+    title: "Market Intelligence",
     description:
-      "Stay ahead with real-time industry trends, salary data, and market analysis.",
+      "Gain advantage with ThunAI's current industry analytics, compensation benchmarks, and employment forecasts.",
   },
   {
     icon: <ScrollText className="w-10 h-10 mb-4 text-primary" />,
-    title: "Smart Resume Creation",
-    description: "Generate ATS-optimized resumes with AI assistance.",
+    title: "Resume Optimization",
+    description: "Create recruiter-friendly, ATS-compatible resumes with ThunAI's intelligent document engine.",
   },
 ];

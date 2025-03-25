@@ -1,7 +1,7 @@
 export const testimonial = [
   {
     quote:
-      "The AI-powered interview prep was a game-changer. Landed my dream job at a top tech company!",
+      "ThunAI's interview simulator transformed my preparation approach. Just secured my ideal position at a leading technology firm!",
     author: "Sarah Chen",
     image: "https://randomuser.me/api/portraits/women/75.jpg",
     role: "Software Engineer",
@@ -9,7 +9,7 @@ export const testimonial = [
   },
   {
     quote:
-      "The industry insights helped me pivot my career successfully. The salary data was spot-on!",
+      "ThunAI's market analytics guided my successful career transition. The compensation projections were remarkably accurate!",
     author: "Michael Rodriguez",
     image: "https://randomuser.me/api/portraits/men/75.jpg",
     role: "Product Manager",
@@ -17,7 +17,7 @@ export const testimonial = [
   },
   {
     quote:
-      "My resume's ATS score improved significantly. Got more interviews in two weeks than in six months!",
+      "My resume's performance metrics soared with ThunAI. Received more interview invitations in two weeks than the previous six months combined!",
     author: "Priya Patel",
     image: "https://randomuser.me/api/portraits/women/74.jpg",
     role: "Marketing Director",

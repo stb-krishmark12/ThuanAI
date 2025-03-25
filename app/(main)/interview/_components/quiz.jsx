@@ -16,11 +16,13 @@ import { generateQuiz, saveQuizResult } from "@/actions/interview";
 import QuizResult from "./quiz-result";
 import useFetch from "@/hooks/use-fetch";
 import { BarLoader } from "react-spinners";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Quiz() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [difficulty, setDifficulty] = useState("medium");
 
   const {
     loading: generatingQuiz,
@@ -80,8 +82,14 @@ export default function Quiz() {
     setCurrentQuestion(0);
     setAnswers([]);
     setShowExplanation(false);
-    generateQuizFn();
+    generateQuizFn({ difficulty });
     setResultData(null);
+  };
+
+  const restartQuiz = () => {
+    setCurrentQuestion(0);
+    setAnswers([]);
+    setShowExplanation(false);
   };
 
   if (generatingQuiz) {
@@ -103,14 +111,24 @@ export default function Quiz() {
         <CardHeader>
           <CardTitle>Ready to test your knowledge?</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <p className="text-muted-foreground">
             This quiz contains 10 questions specific to your industry and
             skills. Take your time and choose the best answer for each question.
           </p>
+          <div className="space-y-2">
+            <Label>Select Difficulty Level</Label>
+            <Tabs value={difficulty} onValueChange={setDifficulty} className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="easy">Easy</TabsTrigger>
+                <TabsTrigger value="medium">Medium</TabsTrigger>
+                <TabsTrigger value="hard">Hard</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={generateQuizFn} className="w-full">
+          <Button onClick={() => generateQuizFn({ difficulty })} className="w-full">
             Start Quiz
           </Button>
         </CardFooter>
@@ -159,18 +177,25 @@ export default function Quiz() {
             Show Explanation
           </Button>
         )}
-        <Button
-          onClick={handleNext}
-          disabled={!answers[currentQuestion] || savingResult}
-          className="ml-auto"
-        >
-          {savingResult && (
-            <BarLoader className="mt-4" width={"100%"} color="gray" />
-          )}
-          {currentQuestion < quizData.length - 1
-            ? "Next Question"
-            : "Finish Quiz"}
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            onClick={restartQuiz}
+          >
+            Restart Quiz
+          </Button>
+          <Button
+            onClick={handleNext}
+            disabled={!answers[currentQuestion] || savingResult}
+          >
+            {savingResult && (
+              <BarLoader className="mt-4" width={"100%"} color="gray" />
+            )}
+            {currentQuestion < quizData.length - 1
+              ? "Next Question"
+              : "Finish Quiz"}
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
