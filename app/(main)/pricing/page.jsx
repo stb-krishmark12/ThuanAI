@@ -3,21 +3,19 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 
 export default function SubscribePage() {
-    const [plans, setPlans] = useState([
-        {
-            id: 'monthly',
-            name: 'Monthly Plan',
-            price: '14900',
-            perMonth: '149/month'
-        },
-        {
-            id: 'quarterly',
-            name: 'Quarterly Plan',
-            price: '39900',
-            perMonth: '399/3 months'
-        }
-    ]);
+    const [plans, setPlans] = useState([]);
     const { isSignedIn } = useAuth();
+    const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
+
+    // Fetch plans from the database
+    useEffect(() => {
+        fetch('/api/subscription-plans')
+            .then(res => res.json())
+            .then(data => setPlans(data))
+            .catch(err => console.error('Error fetching plans:', err));
+    }, []);
+
+    // ... rest of your useEffect for Razorpay loading ...
 
     const handleSubscribe = async (planId) => {
         if (!isSignedIn) {
@@ -25,28 +23,38 @@ export default function SubscribePage() {
             return;
         }
 
-        const res = await fetch('/api/create-order', {
-            method: 'POST',
-            body: JSON.stringify({ planId }),
-            headers: { 'Content-Type': 'application/json' },
-        });
+        if (!isRazorpayLoaded) {
+            alert('Payment system is still loading. Please try again in a moment.');
+            return;
+        }
 
-        const data = await res.json();
+        try {
+            const res = await fetch('/api/create-order', {
+                method: 'POST',
+                body: JSON.stringify({ planId }), // This will now send the correct UUID
+                headers: { 'Content-Type': 'application/json' },
+            });
 
-        const options = {
-            key: data.razorpayKey,
-            amount: data.amount,
-            currency: 'INR',
-            order_id: data.orderId,
-            handler: function (response) {
-                alert('Payment successful!');
-                window.location.href = '/onboarding';
-            },
-            theme: { color: '#6366f1' },
-        };
+            const data = await res.json();
 
-        const rzp = new window.Razorpay(options);
-        rzp.open();
+            const options = {
+                key: data.razorpayKey,
+                amount: data.amount,
+                currency: 'INR',
+                order_id: data.orderId,
+                handler: function (response) {
+                    alert('Payment successful!');
+                    window.location.href = '/onboarding';
+                },
+                theme: { color: '#6366f1' },
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+        } catch (error) {
+            console.error('Payment error:', error);
+            alert('Failed to initiate payment. Please try again.');
+        }
     };
 
     return (
@@ -76,13 +84,12 @@ export default function SubscribePage() {
                                 </h2>
                                 <div className="mb-2">
                                     <span className="text-4xl md:text-5xl font-extrabold text-white">
-                                        ₹{plan.price}
+                                        ₹{(plan.price / 100).toFixed(0)}
                                     </span>
-                                    <span className="text-gray-400 ml-2">/month</span>
+                                    <span className="text-gray-400 ml-2">
+                                        {plan.durationInDays === 30 ? '/month' : '/3 months'}
+                                    </span>
                                 </div>
-                                <p className="text-gray-400 text-sm mb-6">
-                                    {plan.perMonth}
-                                </p>
                                 <button
                                     onClick={() => handleSubscribe(plan.id)}
                                     className={`w-full py-3 px-6 bg-blue-500/50 hover:bg-blue-500/70 text-white font-semibold rounded-md transition-all duration-300 border border-blue-400 hover:border-blue-300 backdrop-blur-sm animate-pulse-slow`}
