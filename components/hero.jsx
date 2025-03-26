@@ -64,12 +64,12 @@ const HeroSection = () => {
           </p>
         </div>
         <div className="flex justify-center space-x-4">
-          <SignInButton>
+          <Link href="/pricing">
             <Button size="lg" className="px-8">
               Get Started
             </Button>
-          </SignInButton>
-          
+          </Link>
+        
         </div>
         <div className="hero-image-wrapper mt-5 md:mt-0 h-[500px]">
           <div ref={containerRef} className="hero-image w-full h-full relative">
