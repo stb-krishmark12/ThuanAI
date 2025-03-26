@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { generateAIInsights } from "./dashboard";
 
@@ -9,27 +9,41 @@ export async function updateUser(data) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-
-  if (!user) throw new Error("User not found");
-
   try {
-    // Start a transaction to handle both operations
+    // Start a transaction to handle all operations
     const result = await db.$transaction(
       async (tx) => {
-        // First check if industry exists
+        // Try to find the user, if not found create a basic record
+        let user = await tx.user.findUnique({
+          where: { clerkUserId: userId },
+        });
+
+        if (!user) {
+          // Get user data from Clerk
+          const clerkUser = await currentUser();
+          const name = `${clerkUser.firstName} ${clerkUser.lastName}`;
+          
+          // Create basic user record
+          user = await tx.user.create({
+            data: {
+              clerkUserId: userId,
+              name,
+              imageUrl: clerkUser.imageUrl,
+              email: clerkUser.emailAddresses[0].emailAddress,
+              skills: [], // Initialize empty skills array
+            },
+          });
+        }
+
+        // Check if industry exists or create it
         let industryInsight = await tx.industryInsight.findUnique({
           where: {
             industry: data.industry,
           },
         });
 
-        // If industry doesn't exist, create it with default values
         if (!industryInsight) {
           const insights = await generateAIInsights(data.industry);
-
           industryInsight = await tx.industryInsight.create({
             data: {
               industry: data.industry,
@@ -39,15 +53,15 @@ export async function updateUser(data) {
           });
         }
 
-        // Now update the user
+        // Update the user with onboarding data
         const updatedUser = await tx.user.update({
           where: {
             id: user.id,
           },
           data: {
             industry: data.industry,
-            experience: parseInt(data.experience),
-            bio: data.bio,
+            experience: parseInt(data.experience) || 0,
+            bio: data.bio || "",
             skills: Array.isArray(data.skills) ? data.skills : [],
             isOnboarded: true,
           },
@@ -59,15 +73,15 @@ export async function updateUser(data) {
         return { success: true, user: updatedUser };
       },
       {
-        timeout: 10000, // default: 5000
+        timeout: 15000, // Increased timeout for safety
       }
     );
 
     revalidatePath("/");
     return result;
   } catch (error) {
-    console.error("Error updating user and industry:", error.message);
-    throw new Error("Failed to update profile");
+    console.error("Error in updateUser:", error);
+    throw new Error(error.message || "Failed to update profile");
   }
 }
 

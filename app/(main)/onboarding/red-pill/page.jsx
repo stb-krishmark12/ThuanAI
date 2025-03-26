@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { generateCareerPDF } from "@/actions/career-pdf";
 import { toast } from "sonner";
+import Script from 'next/script';
 
 const questions = [
   {
@@ -97,6 +98,7 @@ export default function RedPillPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleAnswer = (value) => {
     setAnswers((prev) => ({
@@ -122,96 +124,136 @@ export default function RedPillPage() {
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
+      
       const result = await generateCareerPDF(answers);
       
-      if (result.success && result.pdfBuffer) {
-        // Create a blob from the base64 PDF data
-        const pdfBlob = new Blob(
-          [Buffer.from(result.pdfBuffer, 'base64')],
-          { type: 'application/pdf' }
-        );
-        
-        // Create a download link
-        const url = window.URL.createObjectURL(pdfBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'career-guide.pdf';
-        
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+      if (result.success && result.htmlContent) {
+        // Create a temporary container and add it to the DOM
+        const container = document.createElement('div');
+        container.innerHTML = result.htmlContent;
+        container.style.width = '210mm'; // A4 width
+        container.style.padding = '20px';
+        document.body.appendChild(container);
 
-        toast.success("Your career guide has been generated!");
-        router.push("/onboarding");
+        // Wait for images and fonts to load
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Generate PDF
+        const opt = {
+          margin: [10, 10],
+          filename: 'career-guide.pdf',
+          image: { type: 'jpeg', quality: 1 },
+          html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            logging: true
+          },
+          jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait'
+          }
+        };
+
+        try {
+          await html2pdf()
+            .set(opt)
+            .from(container)
+            .save();
+
+          toast.success("Your career guide has been generated!");
+          router.push("/onboarding");
+        } catch (pdfError) {
+          console.error("PDF generation error:", pdfError);
+          throw new Error("Failed to generate PDF");
+        } finally {
+          // Clean up
+          document.body.removeChild(container);
+        }
       } else {
-        throw new Error("Failed to generate PDF");
+        throw new Error("Failed to get career guide content");
       }
     } catch (error) {
-      toast.error("Failed to generate career guide. Please try again.");
-      console.error("Error submitting answers:", error);
+      console.error("Error:", error);
+      toast.error(error.message || "Failed to generate career guide. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white p-4">
-      <Card className="w-full max-w-2xl p-8 bg-black/50 backdrop-blur-sm border border-gray-800">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4 text-red-400">Red Pill Path</h1>
-          <p className="text-gray-400">
-            Question {currentQuestion + 1} of {questions.length}
-          </p>
-        </div>
-
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold mb-6">
-            {questions[currentQuestion].question}
-          </h2>
-
-          <RadioGroup
-            value={answers[questions[currentQuestion].id]}
-            onValueChange={handleAnswer}
-            className="space-y-4"
-          >
-            {questions[currentQuestion].options.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value={option}
-                  id={`option-${index}`}
-                  className="border-gray-600"
-                />
-                <Label
-                  htmlFor={`option-${index}`}
-                  className="text-gray-300 cursor-pointer"
-                >
-                  {option}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-
-          <div className="flex justify-between mt-8">
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              disabled={currentQuestion === 0}
-            >
-              Previous
-            </Button>
-            <Button
-              onClick={handleNext}
-              disabled={!answers[questions[currentQuestion].id] || isSubmitting}
-            >
-              {currentQuestion === questions.length - 1
-                ? "Generate Career Guide"
-                : "Next"}
-            </Button>
+    <>
+      <Script 
+        src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+        strategy="beforeInteractive"
+      />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white p-4">
+        <Card className="w-full max-w-2xl p-8 bg-black/50 backdrop-blur-sm border border-gray-800">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-4 text-red-400">Red Pill Path</h1>
+            <p className="text-gray-400">
+              Question {currentQuestion + 1} of {questions.length}
+            </p>
           </div>
-        </div>
-      </Card>
-    </div>
+
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold mb-6">
+              {questions[currentQuestion].question}
+            </h2>
+
+            <RadioGroup
+              value={answers[questions[currentQuestion].id]}
+              onValueChange={handleAnswer}
+              className="space-y-4"
+            >
+              {questions[currentQuestion].options.map((option, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value={option}
+                    id={`option-${index}`}
+                    className="border-gray-600"
+                  />
+                  <Label
+                    htmlFor={`option-${index}`}
+                    className="text-gray-300 cursor-pointer"
+                  >
+                    {option}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+
+            {error && (
+              <div className="text-red-400 text-sm mt-4">
+                {error}
+              </div>
+            )}
+
+            <div className="flex justify-between mt-8">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={currentQuestion === 0 || isSubmitting}
+              >
+                Previous
+              </Button>
+              <Button
+                onClick={handleNext}
+                disabled={!answers[questions[currentQuestion].id] || isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⌛</span>
+                    {currentQuestion === questions.length - 1 ? "Generating..." : "Processing..."}
+                  </span>
+                ) : (
+                  currentQuestion === questions.length - 1 ? "Generate Career Guide" : "Next"
+                )}
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </>
   );
 } 
