@@ -7,14 +7,14 @@ export default function SubscribePage() {
         {
             id: 'monthly',
             name: 'Monthly Plan',
-            price: '14900',
+            price: '149',
             perMonth: '149/month'
         },
         {
             id: 'quarterly',
             name: 'Quarterly Plan',
-            price: '39900',
-            perMonth: '399/3 months'
+            price: '399',
+            perMonth: '399/ 3 months'
         }
     ]);
     const { isSignedIn } = useAuth();
