@@ -92,9 +92,7 @@ const OnboardingForm = ({ industries }) => {
               <Select
                 onValueChange={(value) => {
                   setValue("industry", value);
-                  setSelectedIndustry(
-                    industries.find((ind) => ind.id === value)
-                  );
+                  setSelectedIndustry(industries.find((ind) => ind.id === value));
                   setValue("subIndustry", "");
                 }}
               >
