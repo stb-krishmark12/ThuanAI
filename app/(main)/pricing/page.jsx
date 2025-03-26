@@ -7,31 +7,17 @@ export default function SubscribePage() {
         {
             id: 'monthly',
             name: 'Monthly Plan',
-            price: '149',
+            price: '14900',
             perMonth: '149/month'
         },
         {
             id: 'quarterly',
             name: 'Quarterly Plan',
-            price: '399',
-            perMonth: '399/ 3 months'
+            price: '39900',
+            perMonth: '399/3 months'
         }
     ]);
     const { isSignedIn } = useAuth();
-    const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
-
-    useEffect(() => {
-        // Load Razorpay script
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.async = true;
-        script.onload = () => setIsRazorpayLoaded(true);
-        document.body.appendChild(script);
-
-        return () => {
-            document.body.removeChild(script);
-        };
-    }, []);
 
     const handleSubscribe = async (planId) => {
         if (!isSignedIn) {
@@ -39,42 +25,28 @@ export default function SubscribePage() {
             return;
         }
 
-        if (!isRazorpayLoaded) {
-            alert('Payment system is still loading. Please try again in a moment.');
-            return;
-        }
+        const res = await fetch('/api/create-order', {
+            method: 'POST',
+            body: JSON.stringify({ planId }),
+            headers: { 'Content-Type': 'application/json' },
+        });
 
-        try {
-            const res = await fetch('/api/create-order', {
-                method: 'POST',
-                body: JSON.stringify({ planId }),
-                headers: { 'Content-Type': 'application/json' },
-            });
+        const data = await res.json();
 
-            if (!res.ok) {
-                throw new Error('Failed to create order');
-            }
+        const options = {
+            key: data.razorpayKey,
+            amount: data.amount,
+            currency: 'INR',
+            order_id: data.orderId,
+            handler: function (response) {
+                alert('Payment successful!');
+                window.location.href = '/onboarding';
+            },
+            theme: { color: '#6366f1' },
+        };
 
-            const data = await res.json();
-
-            const options = {
-                key: data.razorpayKey,
-                amount: data.amount,
-                currency: 'INR',
-                order_id: data.orderId,
-                handler: function (response) {
-                    alert('Payment successful!');
-                    window.location.href = '/onboarding';
-                },
-                theme: { color: '#6366f1' },
-            };
-
-            const rzp = new window.Razorpay(options);
-            rzp.open();
-        } catch (error) {
-            console.error('Payment error:', error);
-            alert('Failed to initiate payment. Please try again.');
-        }
+        const rzp = new window.Razorpay(options);
+        rzp.open();
     };
 
     return (
