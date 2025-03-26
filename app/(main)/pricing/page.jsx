@@ -68,8 +68,7 @@ export default function SubscribePage() {
                     {plans.map((plan) => (
                         <div
                             key={plan.id}
-                            className="transform hover:scale-105 transition-all duration-500 w-full md:w-1/2 p-6 md:p-8 rounded-lg backdrop-blur-sm cursor-pointer animate-float-left
-                                     border-[1px] border-blue-800 hover:border-blue-500 bg-black/40"
+                            className={`transform hover:scale-105 transition-all duration-500 w-full md:w-1/2 p-6 md:p-8 rounded-lg backdrop-blur-sm cursor-pointer animate-float-left border-[1px] border-blue-800 hover:border-blue-500 bg-black/40`}
                         >
                             <div className="flex flex-col items-center text-center">
                                 <h2 className="text-xl md:text-2xl font-bold text-blue-400 mb-4">
