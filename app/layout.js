@@ -43,7 +43,16 @@ export default function RootLayout({ children }) {
 
               <footer className="bg-muted/50 py-12">
                 <div className="container mx-auto px-4 text-center text-gray-200">
-                  <p>A STB Product</p>
+                  <p className="mb-2">A STB Product</p>
+                  <p className="text-sm text-gray-400">
+                    <span className="inline-flex items-center">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse mr-2"></span>
+                      Beta Version
+                    </span>
+                    <span className="block mt-1">
+                      We're continuously improving to serve you better
+                    </span>
+                  </p>
                 </div>
               </footer>
 

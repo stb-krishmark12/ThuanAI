@@ -59,8 +59,8 @@ export default function PillSelection() {
               </div>
               <h2 className="text-xl md:text-2xl font-bold text-blue-400 mb-2 md:mb-4">Blue Pill</h2>
               <p className="text-sm md:text-base text-gray-300">
-                Take the traditional path. Fill out your complete profile manually and
-                get personalized career guidance based on your detailed information.
+                Already have a career goal? Take this path to get personalized guidance, 
+                skill development plans, and industry insights tailored to your chosen career path.
               </p>
             </div>
           </div>
@@ -80,9 +80,9 @@ export default function PillSelection() {
               </div>
               <h2 className="text-xl md:text-2xl font-bold text-red-400 mb-2 md:mb-4">Red Pill</h2>
               <p className="text-sm md:text-base text-gray-300">
-                Answer 8 quick questions and receive a personalized career roadmap
-                with free course links and internship opportunities sent directly to
-                your email.
+                Unsure about your career path? Take this journey to discover your perfect 
+                career match through our AI-powered assessment and receive a personalized 
+                career roadmap with tailored recommendations.
               </p>
             </div>
           </div>

@@ -105,7 +105,7 @@ export default function SubscribePage() {
                                 How does the billing work?
                             </dt>
                             <dd className="mt-2 text-gray-300">
-                                You'll be billed monthly according to your chosen plan. You can upgrade or downgrade your plan at any time.
+                                You'll be billed monthly according to your chosen plan.
                             </dd>
                         </div>
                         <div className="backdrop-blur-sm bg-black/30 p-6 rounded-lg border border-blue-900/50">

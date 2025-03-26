@@ -97,6 +97,26 @@ export default async function Header() {
             )}
           </SignedIn>
           <SignedOut>
+            <a
+              href="mailto:thestbcompany@gmail.com"
+              className="inline-flex items-center px-4 py-2 border border-blue-500 rounded-md text-sm font-medium text-blue-400 hover:bg-blue-500/10 transition-colors duration-200"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="h-5 w-5 mr-2" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                />
+              </svg>
+              Support
+            </a>
             <SignInButton>
               <Button variant="outline">Sign In</Button>
             </SignInButton>

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/accordion";
 import Image from "next/image";
 import { features } from "@/data/features";
-import { testimonial } from "@/data/testimonial";
+
 import { faqs } from "@/data/faqs";
 import { howItWorks } from "@/data/howItWorks";
 import { useLoading } from "@/components/loading-provider";
@@ -137,7 +137,7 @@ export default function LandingPage() {
       <section className="w-full py-12 md:py-24 bg-muted/50">
         <div className="container mx-auto px-4 md:px-6">
           <h2 className="text-3xl font-bold text-center mb-12">
-            Why Choose AI Career Coach
+            Why Choose ThunAI
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             <Card className="bg-background">
@@ -241,7 +241,7 @@ export default function LandingPage() {
               Join thousands of professionals who are advancing their careers
               with AI-powered guidance.
             </p>
-            <Link href="/dashboard" passHref>
+            <Link href="/pricing" passHref>
               <Button
                 size="lg"
                 variant="secondary"
