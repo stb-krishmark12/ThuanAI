@@ -85,10 +85,7 @@ export default function SubscribePage() {
                                 </p>
                                 <button
                                     onClick={() => handleSubscribe(plan.id)}
-                                    className="w-full py-3 px-6 bg-blue-500/50 hover:bg-blue-500/70 
-                                             text-white font-semibold rounded-md transition-all duration-300
-                                             border border-blue-400 hover:border-blue-300
-                                             backdrop-blur-sm animate-pulse-slow"
+                                    className={`w-full py-3 px-6 bg-blue-500/50 hover:bg-blue-500/70 text-white font-semibold rounded-md transition-all duration-300 border border-blue-400 hover:border-blue-300 backdrop-blur-sm animate-pulse-slow`}
                                 >
                                     Subscribe Now
                                 </button>
