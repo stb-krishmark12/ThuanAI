@@ -10,41 +10,58 @@ export async function generateCareerPDF(answers) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  try {
-    const prompt = `
-      Based on the following personality and career preferences, create a detailed career guide.
+  // Modified prompt to request HTML output
+  const prompt = `
+    Based on the following personality and career preferences, give three different career paths one related to professional, one entrepreneurial career path. Provide a detailed career roadmap for each career path with free courses and internships.
+    
+    Work Preference: ${answers.work_preference}
+    Task Preference: ${answers.task_preference}
+    Learning Style: ${answers.learning_style}
+    Social Interaction: ${answers.social_interaction}
+    Job Motivation: ${answers.job_motivation}
+    Risk Preference: ${answers.risk_preference}
+    Pressure Handling: ${answers.pressure_handling}
+    Work Environment: ${answers.work_environment}
+
+    Please provide the response in HTML format with proper styling. Use the following template and fill in the content:
+
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
+        .header { background: #2980b9; color: white; padding: 20px; text-align: center; }
+        .career-path { margin: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+        .path-title { color: #2980b9; font-size: 24px; margin-bottom: 15px; }
+        .description { margin-bottom: 20px; }
+        .section { margin: 15px 0; }
+        .section-title { color: #2980b9; font-size: 18px; margin-bottom: 10px; }
+        .skill-list, .course-list, .internship-list { padding-left: 20px; }
+        .course { margin-bottom: 15px; }
+        .course-title { color: #2980b9; }
+        .internship { margin-bottom: 20px; }
+        .roadmap { background: #f8f9fa; padding: 20px; margin: 20px; border-radius: 8px; }
+        .timeline { margin: 15px 0; }
+        .timeline-title { color: #2980b9; font-size: 20px; }
+        ul { list-style-type: circle; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Your Personalized Career Guide</h1>
+      </div>
       
-      Work Preference: ${answers.work_preference}
-      Task Preference: ${answers.task_preference}
-      Learning Style: ${answers.learning_style}
-      Social Interaction: ${answers.social_interaction}
-      Job Motivation: ${answers.job_motivation}
-      Risk Preference: ${answers.risk_preference}
-      Pressure Handling: ${answers.pressure_handling}
-      Work Environment: ${answers.work_environment}
+      <!-- Career Paths Section -->
+      [Insert career paths here with proper HTML structure]
+      
+      <!-- Learning Roadmap Section -->
+      [Insert learning roadmap here with proper HTML structure]
+    </body>
+    </html>
 
-      Provide the response as a complete HTML document with embedded styles. Use this exact structure:
+    Fill in the sections with detailed content about career paths, required skills, courses, internships, and the learning roadmap. Make sure to maintain proper HTML structure and use the provided CSS classes.
+  `;
 
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-          }
-          .header {
-            background: linear-gradient(135deg, #2980b9, #2c3e50);
-            color: white;
-            padding: 30px;
-            text-align: center;
-            border
-    `;
-
+  try {
     const result = await model.generateContent(prompt);
     const htmlContent = result.response.text();
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -98,7 +98,19 @@ export default function RedPillPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [shouldNavigate, setShouldNavigate] = useState(false);
   const [error, setError] = useState(null);
+
+  // Handle navigation after successful PDF generation
+  useEffect(() => {
+    if (shouldNavigate) {
+      const timeout = setTimeout(() => {
+        router.push("/onboarding");
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+  }, [shouldNavigate, router]);
 
   const handleAnswer = (value) => {
     setAnswers((prev) => ({
@@ -123,59 +135,52 @@ export default function RedPillPage() {
 
   const handleSubmit = async () => {
     try {
+      if (!isScriptLoaded) {
+        toast.error("Please wait for the page to fully load");
+        return;
+      }
+
       setIsSubmitting(true);
+      setError(null);
       
       const result = await generateCareerPDF(answers);
       
       if (result.success && result.htmlContent) {
-        // Create a temporary container and add it to the DOM
         const container = document.createElement('div');
         container.innerHTML = result.htmlContent;
-        container.style.width = '210mm'; // A4 width
+        container.style.width = '210mm';
         container.style.padding = '20px';
         document.body.appendChild(container);
 
-        // Wait for images and fonts to load
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Generate PDF
-        const opt = {
-          margin: [10, 10],
-          filename: 'career-guide.pdf',
-          image: { type: 'jpeg', quality: 1 },
-          html2canvas: { 
-            scale: 2,
-            useCORS: true,
-            logging: true
-          },
-          jsPDF: { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait'
-          }
-        };
-
         try {
-          await html2pdf()
-            .set(opt)
+          await window.html2pdf()
+            .set({
+              margin: [10, 10],
+              filename: 'career-guide.pdf',
+              image: { type: 'jpeg', quality: 1 },
+              html2canvas: { 
+                scale: 2,
+                useCORS: true,
+                logging: true
+              },
+              jsPDF: { 
+                unit: 'mm', 
+                format: 'a4', 
+                orientation: 'portrait'
+              }
+            })
             .from(container)
             .save();
 
           toast.success("Your career guide has been generated!");
-          router.push("/onboarding");
-        } catch (pdfError) {
-          console.error("PDF generation error:", pdfError);
-          throw new Error("Failed to generate PDF");
+          setShouldNavigate(true); // Trigger navigation after PDF generation
         } finally {
-          // Clean up
           document.body.removeChild(container);
         }
-      } else {
-        throw new Error("Failed to get career guide content");
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error(error.message || "Failed to generate career guide. Please try again.");
+      toast.error("Failed to generate career guide. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -185,7 +190,8 @@ export default function RedPillPage() {
     <>
       <Script 
         src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
+        onLoad={() => setIsScriptLoaded(true)}
       />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white p-4">
         <Card className="w-full max-w-2xl p-8 bg-black/50 backdrop-blur-sm border border-gray-800">
