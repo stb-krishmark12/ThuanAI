@@ -28,7 +28,7 @@ import {
 import { updateUser } from "@/actions/user";
 import { onboardingSchema } from "@/app/lib/schema";
 
-const ProfileEdit = ({ user, industries }) => {
+const ProfileEdit = ({ user, industries, onUpdate }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedIndustry, setSelectedIndustry] = useState(
     industries.find((ind) => ind.id === user.industry.split("-")[0])
@@ -65,6 +65,9 @@ const ProfileEdit = ({ user, industries }) => {
 
       if (result.success) {
         toast.success("Profile updated successfully!");
+        if (onUpdate) {
+          await onUpdate();
+        }
       } else {
         throw new Error("Failed to update profile");
       }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -35,14 +35,38 @@ import { getUser } from "@/actions/user";
 const DashboardView = ({ insights }) => {
   const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadUser = async () => {
-    const userData = await getUser();
-    setUser(userData);
+    try {
+      setIsLoading(true);
+      const userData = await getUser();
+      setUser(userData);
+    } catch (error) {
+      console.error("Error loading user data:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  if (!user) {
+  useEffect(() => {
     loadUser();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <p className="text-muted-foreground">Failed to load user data</p>
+      </div>
+    );
   }
 
   // Transform salary data for the chart
@@ -101,9 +125,9 @@ const DashboardView = ({ insights }) => {
         </Button>
       </div>
 
-      {showProfileEdit && user && (
+      {showProfileEdit && (
         <div className="mb-8">
-          <ProfileEdit user={user} industries={industries} />
+          <ProfileEdit user={user} industries={industries} onUpdate={loadUser} />
         </div>
       )}
 
