@@ -10,8 +10,17 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
+  const { userId, sessionClaims } = await auth();
 
+  // Handle subscribed users trying to access onboarding
+  if (userId && sessionClaims?.metadata?.isSubscribed) {
+    const isOnboardingRoute = req.nextUrl.pathname.startsWith("/onboarding");
+    if (isOnboardingRoute) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+  }
+
+  // Original protection logic
   if (!userId && isProtectedRoute(req)) {
     const { redirectToSignIn } = await auth();
     return redirectToSignIn();
