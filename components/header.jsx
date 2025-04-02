@@ -19,10 +19,21 @@ import {
 import Image from "next/image";
 import { checkUser } from "@/lib/checkUser";
 import { checkSubscribed } from "@/lib/checkSubscribed";
+import { prisma } from "@/lib/prisma";
 
 export default async function Header() {
   await checkUser();
   const { isSubscribed } = await checkSubscribed();
+  
+  // Get user's onboarding status
+  const user = await prisma.user.findFirst({
+    where: {
+      clerkId: process.env.CLERK_USER_ID, // You'll need to get this from the session
+    },
+    select: {
+      hasCompletedOnboarding: true,
+    },
+  });
 
   return (
     <header className="fixed top-0 w-full border-b bg-background/80 backdrop-blur-md z-50 supports-[backdrop-filter]:bg-background/60">
@@ -50,7 +61,7 @@ export default async function Header() {
             {/* Show growth tools and industry insights if subscribed */}
             {isSubscribed && (
               <>
-                <Link href="/onboarding">
+                <Link href={user?.hasCompletedOnboarding ? "/dashboard" : "/onboarding"}>
                   <Button
                     variant="outline"
                     className="hidden md:inline-flex items-center gap-2"
