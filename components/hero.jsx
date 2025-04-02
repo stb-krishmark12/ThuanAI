@@ -4,12 +4,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import { SignInButton } from "@clerk/nextjs";
+import { SignInButton, useAuth } from "@clerk/nextjs";
 
 const HeroSection = () => {
   const containerRef = useRef(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
+  const { isSignedIn, isLoaded } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,21 +56,20 @@ const HeroSection = () => {
       <div className="space-y-6 text-center">
         <div className="space-y-6 mx-auto">
           <h1 className="text-5xl font-bold md:text-6xl lg:text-7xl xl:text-8xl gradient-title animate-gradient">
-          Smarter Moves, 
+            Smarter Moves, 
             <br />
-          Bigger Wins
+            Bigger Wins
           </h1>
           <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl">
-          Boost your career with personalized coaching, interview prep, and AI-driven job success tools.
+            Boost your career with personalized coaching, interview prep, and AI-driven job success tools.
           </p>
         </div>
         <div className="flex justify-center space-x-4">
-          <Link href="/onboarding">
+          <SignInButton mode="modal">
             <Button size="lg" className="px-8">
               Get Started
             </Button>
-          </Link>
-        
+          </SignInButton>
         </div>
         <div className="hero-image-wrapper mt-5 md:mt-0 h-[500px]">
           <div ref={containerRef} className="hero-image w-full h-full relative">
