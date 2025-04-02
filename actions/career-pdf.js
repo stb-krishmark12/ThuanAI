@@ -10,7 +10,7 @@ export async function generateCareerPDF(answers) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  // Simplified prompt with less HTML complexity
+  // Modified prompt to request HTML output
   const prompt = `
     Based on the following personality and career preferences, give three different career paths one related to professional, one entrepreneurial career path. Provide a detailed career roadmap for each career path with free courses and internships.
     
@@ -23,40 +23,50 @@ export async function generateCareerPDF(answers) {
     Pressure Handling: ${answers.pressure_handling}
     Work Environment: ${answers.work_environment}
 
-    Please provide the response in a simple HTML format with minimal styling:
+    Please provide the response in HTML format with proper styling. Use the following template and fill in the content:
 
-    <div class="career-guide">
-      <h1>Your Personalized Career Guide</h1>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
+        .header { background: #2980b9; color: white; padding: 20px; text-align: center; }
+        .career-path { margin: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+        .path-title { color: #2980b9; font-size: 24px; margin-bottom: 15px; }
+        .description { margin-bottom: 20px; }
+        .section { margin: 15px 0; }
+        .section-title { color: #2980b9; font-size: 18px; margin-bottom: 10px; }
+        .skill-list, .course-list, .internship-list { padding-left: 20px; }
+        .course { margin-bottom: 15px; }
+        .course-title { color: #2980b9; }
+        .internship { margin-bottom: 20px; }
+        .roadmap { background: #f8f9fa; padding: 20px; margin: 20px; border-radius: 8px; }
+        .timeline { margin: 15px 0; }
+        .timeline-title { color: #2980b9; font-size: 20px; }
+        ul { list-style-type: circle; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Your Personalized Career Guide</h1>
+      </div>
       
-      <div class="career-path">
-        <h2>Career Path 1</h2>
-        <p>[Career description]</p>
-        <h3>Required Skills</h3>
-        <ul>[Skills list]</ul>
-        <h3>Recommended Courses</h3>
-        <ul>[Course list]</ul>
-        <h3>Internship Opportunities</h3>
-        <ul>[Internship list]</ul>
-      </div>
+      <!-- Career Paths Section -->
+      [Insert career paths here with proper HTML structure]
+      
+      <!-- Learning Roadmap Section -->
+      [Insert learning roadmap here with proper HTML structure]
+    </body>
+    </html>
 
-      <div class="career-path">
-        <h2>Career Path 2</h2>
-        [Similar structure as above]
-      </div>
-
-      <div class="career-path">
-        <h2>Career Path 3</h2>
-        [Similar structure as above]
-      </div>
-    </div>
+    Fill in the sections with detailed content about career paths, required skills, courses, internships, and the learning roadmap. Make sure to maintain proper HTML structure and use the provided CSS classes.
   `;
 
   try {
     const result = await model.generateContent(prompt);
     const htmlContent = result.response.text();
 
-    // Basic HTML validation
-    if (!htmlContent.includes('<div class="career-guide">')) {
+    // Validate HTML content
+    if (!htmlContent.includes('<html>') || !htmlContent.includes('</html>')) {
       throw new Error("Invalid HTML response from AI");
     }
 

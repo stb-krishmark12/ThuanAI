@@ -143,26 +143,13 @@ export default function RedPillPage() {
       setIsSubmitting(true);
       setError(null);
       
-      // Show loading state
-      toast.loading("Generating your career guide...");
-      
       const result = await generateCareerPDF(answers);
       
       if (result.success && result.htmlContent) {
-        // Create a temporary container with minimal styling
         const container = document.createElement('div');
-        container.innerHTML = `
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; }
-            .career-guide { max-width: 800px; margin: 0 auto; padding: 20px; }
-            .career-path { margin: 20px 0; padding: 15px; border: 1px solid #eee; }
-            h1 { text-align: center; margin-bottom: 30px; }
-            h2 { color: #2980b9; margin-bottom: 15px; }
-            h3 { color: #2980b9; margin: 10px 0; }
-            ul { padding-left: 20px; }
-          </style>
-          ${result.htmlContent}
-        `;
+        container.innerHTML = result.htmlContent;
+        container.style.width = '210mm';
+        container.style.padding = '20px';
         document.body.appendChild(container);
 
         try {
@@ -170,11 +157,11 @@ export default function RedPillPage() {
             .set({
               margin: [10, 10],
               filename: 'career-guide.pdf',
-              image: { type: 'jpeg', quality: 0.8 },
+              image: { type: 'jpeg', quality: 1 },
               html2canvas: { 
-                scale: 1.5,
+                scale: 2,
                 useCORS: true,
-                logging: false
+                logging: true
               },
               jsPDF: { 
                 unit: 'mm', 
@@ -186,7 +173,7 @@ export default function RedPillPage() {
             .save();
 
           toast.success("Your career guide has been generated!");
-          setShouldNavigate(true);
+          setShouldNavigate(true); // Trigger navigation after PDF generation
         } finally {
           document.body.removeChild(container);
         }
@@ -194,7 +181,6 @@ export default function RedPillPage() {
     } catch (error) {
       console.error("Error:", error);
       toast.error("Failed to generate career guide. Please try again.");
-      setError(error.message);
     } finally {
       setIsSubmitting(false);
     }
