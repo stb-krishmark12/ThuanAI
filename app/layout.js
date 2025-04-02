@@ -8,6 +8,7 @@ import { dark } from "@clerk/themes";
 import CursorTrailProvider from "@/components/cursor-trail-provider";
 import SupportChatProvider from "@/components/support-chat-provider";
 import { LoadingProvider } from "@/components/loading-provider";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -53,6 +54,11 @@ export default function RootLayout({ children }) {
                       We're continuously improving to serve you better
                     </span>
                   </p>
+                  <div className="mt-4 text-sm text-gray-400">
+                    <Link href="/policies" className="hover:text-white transition-colors duration-200">
+                      Privacy Policy | Terms & Conditions | Refund Policy
+                    </Link>
+                  </div>
                 </div>
               </footer>
 
