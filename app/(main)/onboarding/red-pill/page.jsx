@@ -134,6 +134,7 @@ export default function RedPillPage() {
   };
 
   const handleSubmit = async () => {
+    let loadingToast;
     try {
       if (!isScriptLoaded) {
         toast.error("Please wait for the page to fully load");
@@ -143,26 +144,72 @@ export default function RedPillPage() {
       setIsSubmitting(true);
       setError(null);
       
-      // Show loading state
-      toast.loading("Generating your career guide...");
+      loadingToast = toast.loading("Generating your career guide...");
       
       const result = await generateCareerPDF(answers);
       
       if (result.success && result.htmlContent) {
-        // Create a temporary container with minimal styling
+        console.log("Received HTML content:", result.htmlContent);
+        
+        // Create a temporary container with styling
         const container = document.createElement('div');
         container.innerHTML = `
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; }
-            .career-guide { max-width: 800px; margin: 0 auto; padding: 20px; }
-            .career-path { margin: 20px 0; padding: 15px; border: 1px solid #eee; }
-            h1 { text-align: center; margin-bottom: 30px; }
-            h2 { color: #2980b9; margin-bottom: 15px; }
-            h3 { color: #2980b9; margin: 10px 0; }
-            ul { padding-left: 20px; }
+            @page {
+              margin: 15mm;
+            }
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .career-guide {
+              max-width: 100%;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .career-path {
+              margin: 20px 0;
+              padding: 20px;
+              border: 1px solid #e0e0e0;
+              border-radius: 8px;
+              background-color: #fff;
+            }
+            h1 {
+              text-align: center;
+              color: #2980b9;
+              font-size: 24px;
+              margin-bottom: 30px;
+            }
+            h2 {
+              color: #2980b9;
+              font-size: 20px;
+              margin: 15px 0;
+            }
+            h3 {
+              color: #2980b9;
+              font-size: 16px;
+              margin: 10px 0;
+            }
+            ul {
+              padding-left: 20px;
+              margin: 10px 0;
+            }
+            li {
+              margin: 5px 0;
+            }
+            p {
+              margin: 10px 0;
+            }
           </style>
           ${result.htmlContent}
         `;
+
+        // Validate content before generating PDF
+        if (container.textContent.trim().length === 0) {
+          throw new Error("Generated content is empty");
+        }
+
         document.body.appendChild(container);
 
         try {
@@ -170,32 +217,43 @@ export default function RedPillPage() {
             .set({
               margin: [10, 10],
               filename: 'career-guide.pdf',
-              image: { type: 'jpeg', quality: 0.8 },
+              image: { type: 'jpeg', quality: 0.95 },
               html2canvas: { 
-                scale: 1.5,
+                scale: 2,
                 useCORS: true,
-                logging: false
+                logging: true,
+                letterRendering: true
               },
               jsPDF: { 
                 unit: 'mm', 
                 format: 'a4', 
-                orientation: 'portrait'
-              }
+                orientation: 'portrait',
+                compress: true
+              },
+              pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             })
             .from(container)
             .save();
 
-          toast.success("Your career guide has been generated!");
+          toast.success("Your career guide has been generated successfully!");
           setShouldNavigate(true);
+        } catch (pdfError) {
+          console.error("PDF generation error:", pdfError);
+          throw new Error("Failed to generate PDF file");
         } finally {
           document.body.removeChild(container);
         }
+      } else {
+        throw new Error("Invalid response from server");
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Failed to generate career guide. Please try again.");
+      toast.error(error.message || "Failed to generate career guide. Please try again.");
       setError(error.message);
     } finally {
+      if (loadingToast) {
+        toast.dismiss(loadingToast);
+      }
       setIsSubmitting(false);
     }
   };
