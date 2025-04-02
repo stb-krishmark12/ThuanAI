@@ -31,7 +31,7 @@ export default async function Header() {
   
   // Check if user has completed onboarding
   const userProfile = userId ? await prisma.user.findUnique({
-    where: { id: userId },
+    where: { clerkId: userId },
     select: { hasCompletedOnboarding: true }
   }) : null;
 
