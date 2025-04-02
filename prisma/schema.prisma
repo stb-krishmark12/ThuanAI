@@ -8,27 +8,31 @@ datasource db {
 }
 
 model User {
-  id              String           @id @default(uuid())
-  clerkUserId     String           @unique // clerk user id
-  email           String           @unique
-  name            String?
-  imageUrl        String?
-  industry        String? // Combined industry-subindustry (e.g., "tech-software-development")
-  industryInsight IndustryInsight? @relation(fields: [industry], references: [industry])
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  isOnboarded     Boolean          @default(false) // Flag to indicate if the user has completed onboarding
+  id                    String    @id @default(cuid())
+  clerkId               String    @unique
+  email                 String    @unique
+  name                  String?
+  imageUrl              String?
+  industry              String?
+  industryInsight       IndustryInsight? @relation(fields: [industry], references: [industry])
+  hasCompletedOnboarding Boolean  @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  isOnboarded           Boolean   @default(false) // Flag to indicate if the user has completed onboarding
 
   // Profile fields
-  bio        String?
-  experience Int? // Years of experience
+  bio                   String?
+  experience            Json?
+  education             Json?
+  skills                String?
 
   // Relations
-  skills       String[] // Array of skills
-  assessments  Assessment[]
-  resume       Resume?
-  coverLetter  CoverLetter[]
-  Subscription Subscription[]
+  assessments           Assessment[]
+  resume                Resume?
+  coverLetter           CoverLetter[]
+  subscriptions         Subscription[]
+
+  @@index([industry])
 }
 
 model Assessment {
@@ -120,6 +124,6 @@ model Subscription {
   razorpayPaymentId String
   createdAt         DateTime @default(now())
 
-  user User             @relation(fields: [userId], references: [clerkUserId])
+  user User             @relation(fields: [userId], references: [clerkId])
   plan SubscriptionPlan @relation(fields: [planId], references: [id])
 }

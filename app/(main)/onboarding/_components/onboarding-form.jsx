@@ -55,6 +55,7 @@ const OnboardingForm = ({ industries }) => {
       const result = await updateUser({
         ...values,
         industry: formattedIndustry,
+        hasCompletedOnboarding: true
       });
 
       if (result.success) {
