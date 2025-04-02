@@ -50,7 +50,7 @@ export default async function Header() {
             {/* Show growth tools and industry insights if subscribed */}
             {isSubscribed && (
               <>
-                <Link href="/onboarding">
+                <Link href="/dashboard">
                   <Button
                     variant="outline"
                     className="hidden md:inline-flex items-center gap-2"
