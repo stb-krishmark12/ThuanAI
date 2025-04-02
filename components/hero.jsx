@@ -4,13 +4,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import { SignInButton, useAuth } from "@clerk/nextjs";
+import { SignInButton } from "@clerk/nextjs";
 
 const HeroSection = () => {
   const containerRef = useRef(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
-  const { isSignedIn } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,19 +64,12 @@ const HeroSection = () => {
           </p>
         </div>
         <div className="flex justify-center space-x-4">
-          {isSignedIn ? (
-            <Link href="/onboarding">
-              <Button size="lg" className="px-8">
-                Get Started
-              </Button>
-            </Link>
-          ) : (
-            <SignInButton>
-              <Button size="lg" className="px-8">
-                Get Started
-              </Button>
-            </SignInButton>
-          )}
+          <Link href="/pricing">
+            <Button size="lg" className="px-8">
+              Get Started
+            </Button>
+          </Link>
+        
         </div>
         <div className="hero-image-wrapper mt-5 md:mt-0 h-[500px]">
           <div ref={containerRef} className="hero-image w-full h-full relative">
