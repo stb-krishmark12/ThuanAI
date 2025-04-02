@@ -5,12 +5,20 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { SignInButton, useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 const HeroSection = () => {
   const containerRef = useRef(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
   const { isSignedIn, isLoaded } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push('/onboarding');
+    }
+  }, [isLoaded, isSignedIn, router]);
 
   useEffect(() => {
     const handleScroll = () => {
