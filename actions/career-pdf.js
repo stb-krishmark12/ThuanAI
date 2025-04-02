@@ -62,7 +62,14 @@ export async function generateCareerPDF(answers) {
   `;
 
   try {
-    const result = await model.generateContent(prompt);
+    // Set a longer timeout for the API call
+    const result = await Promise.race([
+      model.generateContent(prompt),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Request timeout")), 60000) // 60 second timeout
+      )
+    ]);
+
     const htmlContent = result.response.text();
 
     // Validate HTML content
@@ -76,6 +83,9 @@ export async function generateCareerPDF(answers) {
     };
   } catch (error) {
     console.error("Career guide generation error:", error);
-    throw new Error("Failed to generate career guide");
+    if (error.message === "Request timeout") {
+      throw new Error("The request took too long to complete. Please try again.");
+    }
+    throw new Error("Failed to generate career guide. Please try again.");
   }
 }
