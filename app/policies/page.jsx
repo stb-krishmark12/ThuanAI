@@ -66,12 +66,7 @@ export default function PoliciesPage() {
             <p>For any queries or concerns, please contact us:</p>
             <div className="space-y-2">
               <p>Email: thestbcompany@gmail.com</p>
-              <p>Address: STB Company</p>
-              <p>123 Business Street</p>
-              <p>City, State 12345</p>
-              <p>Country</p>
             </div>
-            <p>Business Hours: Monday - Friday, 9:00 AM - 6:00 PM (IST)</p>
           </div>
         </section>
       </div>
