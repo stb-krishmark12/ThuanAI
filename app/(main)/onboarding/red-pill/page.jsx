@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { generateCareerPDF } from "@/actions/career-pdf";
 import { toast } from "sonner";
 import Script from 'next/script';
@@ -90,6 +91,11 @@ const questions = [
       "Dynamic, changing environments",
       "Flexible, adaptable spaces"
     ]
+  },
+  {
+    id: "personal_interests",
+    question: "Tell us about your interests, hobbies, or any specific career goals:",
+    type: "text"
   }
 ];
 
@@ -101,6 +107,7 @@ export default function RedPillPage() {
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [shouldNavigate, setShouldNavigate] = useState(false);
   const [error, setError] = useState(null);
+  const [textInput, setTextInput] = useState("");
 
   // Handle navigation after successful PDF generation
   useEffect(() => {
@@ -113,6 +120,15 @@ export default function RedPillPage() {
   }, [shouldNavigate, router]);
 
   const handleAnswer = (value) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questions[currentQuestion].id]: value
+    }));
+  };
+
+  const handleTextInput = (e) => {
+    const value = e.target.value;
+    setTextInput(value);
     setAnswers((prev) => ({
       ...prev,
       [questions[currentQuestion].id]: value
@@ -173,7 +189,7 @@ export default function RedPillPage() {
             .save();
 
           toast.success("Your career guide has been generated!");
-          setShouldNavigate(true); // Trigger navigation after PDF generation
+          setShouldNavigate(true);
         } finally {
           document.body.removeChild(container);
         }
@@ -185,6 +201,8 @@ export default function RedPillPage() {
       setIsSubmitting(false);
     }
   };
+
+  const currentQuestionData = questions[currentQuestion];
 
   return (
     <>
@@ -204,30 +222,41 @@ export default function RedPillPage() {
 
           <div className="space-y-6">
             <h2 className="text-2xl font-bold mb-6">
-              {questions[currentQuestion].question}
+              {currentQuestionData.question}
             </h2>
 
-            <RadioGroup
-              value={answers[questions[currentQuestion].id]}
-              onValueChange={handleAnswer}
-              className="space-y-4"
-            >
-              {questions[currentQuestion].options.map((option, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value={option}
-                    id={`option-${index}`}
-                    className="border-gray-600"
-                  />
-                  <Label
-                    htmlFor={`option-${index}`}
-                    className="text-gray-300 cursor-pointer"
-                  >
-                    {option}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
+            {currentQuestionData.type === "text" ? (
+              <div className="space-y-4">
+                <Input
+                  value={answers[currentQuestionData.id] || ""}
+                  onChange={handleTextInput}
+                  placeholder="Share your interests and career goals..."
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                />
+              </div>
+            ) : (
+              <RadioGroup
+                value={answers[currentQuestionData.id]}
+                onValueChange={handleAnswer}
+                className="space-y-4"
+              >
+                {currentQuestionData.options.map((option, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value={option}
+                      id={`option-${index}`}
+                      className="border-gray-600"
+                    />
+                    <Label
+                      htmlFor={`option-${index}`}
+                      className="text-gray-300 cursor-pointer"
+                    >
+                      {option}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            )}
 
             {error && (
               <div className="text-red-400 text-sm mt-4">
@@ -245,7 +274,7 @@ export default function RedPillPage() {
               </Button>
               <Button
                 onClick={handleNext}
-                disabled={!answers[questions[currentQuestion].id] || isSubmitting}
+                disabled={!answers[currentQuestionData.id] || isSubmitting}
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
