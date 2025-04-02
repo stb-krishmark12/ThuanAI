@@ -19,23 +19,10 @@ import {
 import Image from "next/image";
 import { checkUser } from "@/lib/checkUser";
 import { checkSubscribed } from "@/lib/checkSubscribed";
-import { prisma } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs";
 
 export default async function Header() {
   await checkUser();
   const { isSubscribed } = await checkSubscribed();
-  
-  // Get the current user's ID from Clerk
-  const { userId } = await auth();
-  
-  // Check if user has completed onboarding
-  const userProfile = userId ? await prisma.user.findUnique({
-    where: { clerkId: userId },
-    select: { hasCompletedOnboarding: true }
-  }) : null;
-
-  const hasCompletedOnboarding = userProfile?.hasCompletedOnboarding || false;
 
   return (
     <header className="fixed top-0 w-full border-b bg-background/80 backdrop-blur-md z-50 supports-[backdrop-filter]:bg-background/60">
@@ -63,13 +50,13 @@ export default async function Header() {
             {/* Show growth tools and industry insights if subscribed */}
             {isSubscribed && (
               <>
-                <Link href={hasCompletedOnboarding ? "/dashboard" : "/onboarding"}>
+                <Link href="/dashboard">
                   <Button
                     variant="outline"
                     className="hidden md:inline-flex items-center gap-2"
                   >
                     <LayoutDashboard className="h-4 w-4" />
-                    {hasCompletedOnboarding ? "Industry Insights" : "Complete Onboarding"}
+                    Industry Insights
                   </Button>
                   <Button variant="ghost" className="md:hidden w-10 h-10 p-0">
                     <LayoutDashboard className="h-4 w-4" />
