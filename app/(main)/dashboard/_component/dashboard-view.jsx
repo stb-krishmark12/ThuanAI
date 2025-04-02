@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   BarChart,
   Bar,
@@ -27,48 +27,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { industries } from "@/data/industries";
-import ProfileEdit from "./profile-edit";
-import { getUser } from "@/actions/user";
 
 const DashboardView = ({ insights }) => {
-  const [showProfileEdit, setShowProfileEdit] = useState(false);
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const loadUser = async () => {
-    try {
-      setIsLoading(true);
-      const userData = await getUser();
-      setUser(userData);
-    } catch (error) {
-      console.error("Error loading user data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadUser();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Failed to load user data</p>
-      </div>
-    );
-  }
-
   // Transform salary data for the chart
   const salaryData = insights.salaryRanges.map((range) => ({
     name: range.role,
@@ -114,109 +74,9 @@ const DashboardView = ({ insights }) => {
   );
 
   return (
-    <div className="space-y-6 py-6">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Industry Insights</h1>
-        <Button
-          variant="outline"
-          onClick={() => setShowProfileEdit(!showProfileEdit)}
-        >
-          {showProfileEdit ? "Hide Profile Edit" : "Edit Profile"}
-        </Button>
-      </div>
-
-      {showProfileEdit && (
-        <div className="mb-8">
-          <ProfileEdit user={user} industries={industries} onUpdate={loadUser} />
-        </div>
-      )}
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Salary Ranges</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {insights.salaryRanges.map((range, index) => (
-                <div key={index} className="flex justify-between">
-                  <span>{range.level}</span>
-                  <span className="font-medium">{range.range}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Growth Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-500">
-              {insights.growthRate}%
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Annual industry growth rate
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Demand Level</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-500">
-              {insights.demandLevel}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Current market demand
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-2 lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Top Skills</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {insights.topSkills.map((skill, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-2 lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Market Outlook</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">{insights.marketOutlook}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-2 lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Key Trends</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="list-disc list-inside space-y-2">
-              {insights.keyTrends.map((trend, index) => (
-                <li key={index} className="text-muted-foreground">
-                  {trend}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        <Badge variant="outline">Last updated: {lastUpdatedDate}</Badge>
       </div>
 
       {/* Market Overview Cards */}

@@ -1,19 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-export default function PillSelection({ onSelect }) {
+export default function PillSelection() {
+  const router = useRouter();
   const [selectedPill, setSelectedPill] = useState(null);
 
   const handlePillSelect = (pill) => {
     setSelectedPill(pill);
-    if (pill === "blue") {
-      onSelect();
+    if (pill === "red") {
+      router.push("/onboarding/red-pill");
     } else {
-      // For red pill, we'll handle it later
-      console.log("Red pill selected");
+      router.push("/onboarding/form");
     }
   };
 
