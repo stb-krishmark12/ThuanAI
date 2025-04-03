@@ -11,6 +11,7 @@ const HeroSection = () => {
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
   const { isSignedIn } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,12 +52,33 @@ const HeroSection = () => {
     setIframeError(true);
   };
 
+  const handleClickGetStarted = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/user/isonboarded");
+      const data = await res.json();
+
+      if (data.onboarded) {
+        window.location.href = "/dashboard";
+      } else {
+        window.location.href = "/onboarding";
+      }
+    } catch (error) {
+      console.error("Error checking onboarding status:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
     <section className="w-full pt-36 md:pt-48 pb-10">
       <div className="space-y-6 text-center">
         <div className="space-y-6 mx-auto">
           <h1 className="text-5xl font-bold md:text-6xl lg:text-7xl xl:text-8xl gradient-title animate-gradient">
-            Smarter Moves, 
+            Smarter Moves,
             <br />
             Bigger Wins
           </h1>
@@ -66,11 +88,9 @@ const HeroSection = () => {
         </div>
         <div className="flex justify-center space-x-4">
           {isSignedIn ? (
-            <Link href="/dashboard">
-              <Button size="lg" className="px-8">
-                Get Started
-              </Button>
-            </Link>
+            <Button size="lg" className="px-8" onClick={handleClickGetStarted}>
+              {isLoading ? "Loading..." : "Get Started"}
+            </Button>
           ) : (
             <SignInButton mode="modal">
               <Button size="lg" className="px-8">
@@ -89,7 +109,7 @@ const HeroSection = () => {
                 </div>
               </div>
             )}
-            
+
             {iframeError ? (
               <FallbackImage />
             ) : (
