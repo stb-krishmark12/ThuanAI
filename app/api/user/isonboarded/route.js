@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 
 export async function GET() {
-    const { userId } = auth();
+    const { userId } = await auth();
 
     if (!userId) {
         return NextResponse.json({ onboarded: false }, { status: 401 });
