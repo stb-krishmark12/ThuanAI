@@ -16,6 +16,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Refresh the page once when component mounts
+
     if (!window.location.href.includes('?refreshed=true')) {
       window.location.href = window.location.href + '?refreshed=true';
       return;
@@ -24,11 +25,14 @@ export default function DashboardPage() {
     const loadDashboard = async () => {
       showLoading("Loading your dashboard...");
       try {
-        const { isOnboarded } = await getUserOnboardingStatus();
-        if (!isOnboarded) {
-          redirect("/onboarding");
+        const res = await fetch("/api/user/isonboarded");
+        const d = await res.json();
+
+        if (!d.onboarded) {
+          window.location.href = "/onboarding";
           return;
         }
+
         const data = await getIndustryInsights();
         setInsights(data);
       } catch (error) {
@@ -37,6 +41,7 @@ export default function DashboardPage() {
         hideLoading();
       }
     };
+
 
     loadDashboard();
   }, []);
